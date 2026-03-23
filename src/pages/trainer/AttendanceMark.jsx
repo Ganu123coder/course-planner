@@ -68,7 +68,7 @@ const AttendanceMark = () => {
       alert("Attendance saved successfully");
 
       // Download Excel automatically
-      window.open("http://localhost:5000/api/export-attendance");
+      window.open("https://course-planner3.onrender.com/api/export-attendance");
 
       navigate('/trainer');
 
@@ -85,7 +85,7 @@ const AttendanceMark = () => {
 
 const token = localStorage.getItem("token");
 
-fetch("http://localhost:5000/api/export-attendance", {
+fetch("https://course-planner3.onrender.com/api/export-attendance", {
   headers: {
     Authorization: "Bearer " + token
   }

@@ -11,7 +11,7 @@ const CourseModules = () => {
   const [file, setFile] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/courses/${id}`)
+    fetch(`https://course-planner3.onrender.com/api/courses/${id}`)
       .then(res => res.json())
       .then(data => {
         setModules(data.modules || []);
@@ -31,10 +31,10 @@ const CourseModules = () => {
     formData.append("studentId", user.id);
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload-assignment", {
-        method: "POST",
-        body: formData
-      });
+  const res = await fetch("https://course-planner3.onrender.com/api/upload-assignment", {
+    method: "POST",
+    body: formData
+  });
 
       const data = await res.json();
       alert(data.message);
