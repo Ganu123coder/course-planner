@@ -250,7 +250,7 @@ app.get('/api/export-attendance', authenticateToken, async (req, res) => {
 
 
 // Start the server
-app.listen(PORT, function () {
-    console.log("Server running on http://localhost:" + PORT);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
