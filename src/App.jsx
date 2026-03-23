@@ -31,6 +31,7 @@ const App = () => {
           <Route path="/trainer" element={<PrivateRoute role="trainer"><TrainerDashboard /></PrivateRoute>} />
           <Route path="/trainer/courses/new" element={<PrivateRoute role="trainer"><CourseCreate /></PrivateRoute>} />
           <Route path="/trainer/attendance/:courseId/:moduleId" element={<PrivateRoute role="trainer"><AttendanceMark /></PrivateRoute>} />
+          <Route path="/modules/:courseId" element={<TrainerModules />} />
 
           {/* Student Routes */}
           <Route path="/student" element={<PrivateRoute role="student"><StudentDashboard /></PrivateRoute>} />

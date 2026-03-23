@@ -89,6 +89,14 @@ const TrainerDashboard = () => {
                     <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-primary-400" />
                   </Link>
                 ))}
+                    <Link
+                       to={`/trainer/modules/${course.id}`}
+                       className="flex items-center justify-center mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                        View All Modules
+                    </Link>
+
+
                 {(!course.modules || course.modules.length === 0) && (
                   <p className="text-xs italic text-gray-400 py-2">No modules added yet</p>
                 )}
