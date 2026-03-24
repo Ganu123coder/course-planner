@@ -11,7 +11,7 @@ import CourseList from './pages/student/CourseList';
 import AttendanceHistory from './pages/student/AttendanceHistory';
 import DashboardLayout from './layouts/DashboardLayout';
 import CourseModules from './pages/student/CourseModules';
-
+import TrainerModules from './TrainerModules';
 const PrivateRoute = ({ children, role }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
