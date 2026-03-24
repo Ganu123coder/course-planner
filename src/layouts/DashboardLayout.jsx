@@ -7,7 +7,8 @@ import {
   UserCheck, 
   LogOut, 
   PlusCircle,
-  History
+  History,
+  Calendar
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -26,10 +27,11 @@ const DashboardLayout = ({ children }) => {
         { name: 'Create Course', path: '/trainer/courses/new', icon: <PlusCircle className="w-5 h-5" /> },
       ]
     : [
-        { name: 'Dashboard', path: '/student', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { name: 'All Courses', path: '/student/courses', icon: <BookOpen className="w-5 h-5" /> },
-        { name: 'My Attendance', path: '/student/attendance', icon: <History className="w-5 h-5" /> },
-      ];
+    { name: 'Dashboard', path: '/student', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: 'All Courses', path: '/student/courses', icon: <BookOpen className="w-5 h-5" /> },
+    { name: 'My Attendance', path: '/student/attendance', icon: <History className="w-5 h-5" /> },
+    { name: 'Day Planner', path: '/student/day-planner', icon: <Calendar className="w-5 h-5" /> },
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-50">

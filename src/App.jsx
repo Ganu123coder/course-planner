@@ -12,6 +12,7 @@ import AttendanceHistory from './pages/student/AttendanceHistory';
 import DashboardLayout from './layouts/DashboardLayout';
 import CourseModules from './pages/student/CourseModules';
 import TrainerModules from './pages/trainer/TrainerModules';
+import DayPlanner from "./pages/student/DayPlanner";
 const PrivateRoute = ({ children, role }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
@@ -26,6 +27,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/student/day-planner" element={<DayPlanner />} />
           
           {/* Trainer Routes */}
           <Route path="/trainer" element={<PrivateRoute role="trainer"><TrainerDashboard /></PrivateRoute>} />
@@ -38,6 +40,7 @@ const App = () => {
           <Route path="/student/courses" element={<PrivateRoute role="student"><CourseList /></PrivateRoute>} />
           <Route path="/student/attendance" element={<PrivateRoute role="student"><AttendanceHistory /></PrivateRoute>} />
           <Route path="/student/course/:id" element={<PrivateRoute role="student"> <CourseModules /></PrivateRoute>
+          
   } 
 />
 
