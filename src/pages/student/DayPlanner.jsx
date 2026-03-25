@@ -172,31 +172,34 @@ const DayPlanner = () => {
 
               {plan.map(day => (
 
-                <div key={day.day} className="bg-white p-6 rounded-xl shadow">
+  <div key={day.day} className="bg-white p-6 rounded-xl shadow">
 
-                  <h3 className="font-bold mb-3">Day {day.day}</h3>
+    <h3 className="font-bold mb-3">
+      Day {day.day}
+    </h3>
 
-                  {day.schedule.map((item, index) => (
+    {day.schedule.map((item, index) => (
 
-                    <div
-                      key={index}
-                      className="flex justify-between border-b py-2"
-                    >
+      <div
+        key={index}
+        className="flex justify-between border-b py-2"
+      >
 
-                      <span className="font-medium">
-                        {item.time}
-                      </span>
+        <span className="font-medium">
+          {item.time}
+        </span>
 
-                      <span>{item.module}</span>
+        <span>
+          {item.task}
+        </span>
 
-                    </div>
+      </div>
 
-                  ))}
+    ))}
 
-                </div>
+  </div>
 
-              ))}
-
+))}
             </div>
 
           )}
