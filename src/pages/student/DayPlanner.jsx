@@ -6,7 +6,10 @@ const DayPlanner = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [modules, setModules] = useState([]);
+
   const [days, setDays] = useState("");
+  const [hours, setHours] = useState("");
+
   const [plan, setPlan] = useState([]);
 
   useEffect(() => {
@@ -14,19 +17,8 @@ const DayPlanner = () => {
   }, []);
 
   const fetchCourses = async () => {
-
-    try {
-
-      const res = await api.get("/courses");
-
-      setCourses(res.data);
-
-    } catch (err) {
-
-      console.error("Failed to fetch courses");
-
-    }
-
+    const res = await api.get("/courses");
+    setCourses(res.data);
   };
 
   const openCourse = async (courseId) => {
@@ -34,51 +26,71 @@ const DayPlanner = () => {
     const res = await api.get(`/courses/${courseId}`);
 
     setSelectedCourse(res.data);
-
     setModules(res.data.modules);
 
   };
 
   const generatePlan = () => {
 
-    if (!days || days <= 0) {
+  if (!days || !hours) {
+    alert("Enter days and hours");
+    return;
+  }
 
-      alert("Enter valid number of days");
+  let moduleIndex = 0;
+  const generatedPlan = [];
 
-      return;
+  for (let d = 1; d <= days; d++) {
+
+    let startHour = 9;
+    const daySchedule = [];
+
+    for (let h = 0; h < hours; h++) {
+
+      if (moduleIndex < modules.length) {
+
+        const endHour = startHour + 1;
+
+        daySchedule.push({
+          time: `${startHour}:00 - ${endHour}:00`,
+          task: modules[moduleIndex].title
+        });
+
+        moduleIndex++;
+
+        startHour = endHour;
+
+        // break time
+        daySchedule.push({
+          time: `${startHour}:00 - ${startHour}:10`,
+          task: "Break"
+        });
+
+      }
 
     }
 
-    const modulesPerDay = Math.ceil(modules.length / days);
+    // add revision slot
+    daySchedule.push({
+      time: `${startHour}:10 - ${startHour + 1}:00`,
+      task: "Revision / Practice"
+    });
 
-    const generatedPlan = [];
+    generatedPlan.push({
+      day: d,
+      schedule: daySchedule
+    });
 
-    let index = 0;
+  }
 
-    for (let i = 1; i <= days; i++) {
+  setPlan(generatedPlan);
 
-      const dayModules = modules.slice(index, index + modulesPerDay);
-
-      generatedPlan.push({
-        day: i,
-        modules: dayModules
-      });
-
-      index += modulesPerDay;
-
-    }
-
-    setPlan(generatedPlan);
-
-  };
-
+};
   return (
 
     <div className="max-w-4xl mx-auto space-y-6">
 
-      <h1 className="text-2xl font-bold">Smart Study Planner</h1>
-
-      {/* COURSE LIST */}
+      <h1 className="text-2xl font-bold">Hourly Study Planner</h1>
 
       {!selectedCourse && (
 
@@ -86,10 +98,7 @@ const DayPlanner = () => {
 
           {courses.map(course => (
 
-            <div
-              key={course.id}
-              className="bg-white p-6 rounded-xl shadow border"
-            >
+            <div key={course.id} className="bg-white p-6 rounded-xl shadow">
 
               <h2 className="font-bold text-lg">{course.title}</h2>
 
@@ -101,7 +110,7 @@ const DayPlanner = () => {
                 onClick={() => openCourse(course.id)}
                 className="bg-primary-600 text-white px-4 py-2 rounded-lg"
               >
-                Create Plan
+                Plan Study
               </button>
 
             </div>
@@ -111,8 +120,6 @@ const DayPlanner = () => {
         </div>
 
       )}
-
-      {/* COURSE PLANNER */}
 
       {selectedCourse && (
 
@@ -125,23 +132,29 @@ const DayPlanner = () => {
             }}
             className="text-primary-600"
           >
-            ← Back to Courses
+            ← Back
           </button>
 
           <h2 className="text-xl font-bold">
-            {selectedCourse.title} Planner
+            {selectedCourse.title} Study Plan
           </h2>
-
-          {/* ENTER DAYS */}
 
           <div className="flex gap-4">
 
             <input
               type="number"
-              placeholder="Enter number of days"
+              placeholder="Days"
               value={days}
               onChange={(e) => setDays(e.target.value)}
-              className="border p-3 rounded-lg w-64"
+              className="border p-3 rounded-lg"
+            />
+
+            <input
+              type="number"
+              placeholder="Hours per day"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              className="border p-3 rounded-lg"
             />
 
             <button
@@ -153,34 +166,32 @@ const DayPlanner = () => {
 
           </div>
 
-          {/* PLAN RESULT */}
-
           {plan.length > 0 && (
 
-            <div className="space-y-4">
+            <div className="space-y-6">
 
               {plan.map(day => (
 
-                <div
-                  key={day.day}
-                  className="bg-white p-5 rounded-xl shadow"
-                >
+                <div key={day.day} className="bg-white p-6 rounded-xl shadow">
 
-                  <h3 className="font-bold mb-3">
-                    Day {day.day}
-                  </h3>
+                  <h3 className="font-bold mb-3">Day {day.day}</h3>
 
-                  <ul className="list-disc ml-5 space-y-1">
+                  {day.schedule.map((item, index) => (
 
-                    {day.modules.map(module => (
+                    <div
+                      key={index}
+                      className="flex justify-between border-b py-2"
+                    >
 
-                      <li key={module.id}>
-                        {module.title}
-                      </li>
+                      <span className="font-medium">
+                        {item.time}
+                      </span>
 
-                    ))}
+                      <span>{item.module}</span>
 
-                  </ul>
+                    </div>
+
+                  ))}
 
                 </div>
 
