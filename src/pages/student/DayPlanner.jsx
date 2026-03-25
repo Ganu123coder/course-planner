@@ -6,7 +6,8 @@ const DayPlanner = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [modules, setModules] = useState([]);
-  const [progress, setProgress] = useState({});
+  const [days, setDays] = useState("");
+  const [plan, setPlan] = useState([]);
 
   useEffect(() => {
     fetchCourses();
@@ -28,42 +29,46 @@ const DayPlanner = () => {
 
   };
 
-  const generatePlan = async (courseId) => {
+  const openCourse = async (courseId) => {
 
-    try {
+    const res = await api.get(`/courses/${courseId}`);
 
-      const res = await api.get(`/courses/${courseId}`);
+    setSelectedCourse(res.data);
 
-      setSelectedCourse(res.data);
-
-      setModules(res.data.modules);
-
-      const savedProgress =
-        JSON.parse(localStorage.getItem(`planner_${courseId}`)) || {};
-
-      setProgress(savedProgress);
-
-    } catch (err) {
-
-      console.error("Failed to load modules");
-
-    }
+    setModules(res.data.modules);
 
   };
 
-  const toggleComplete = (moduleId) => {
+  const generatePlan = () => {
 
-    const updated = {
-      ...progress,
-      [moduleId]: !progress[moduleId]
-    };
+    if (!days || days <= 0) {
 
-    setProgress(updated);
+      alert("Enter valid number of days");
 
-    localStorage.setItem(
-      `planner_${selectedCourse.id}`,
-      JSON.stringify(updated)
-    );
+      return;
+
+    }
+
+    const modulesPerDay = Math.ceil(modules.length / days);
+
+    const generatedPlan = [];
+
+    let index = 0;
+
+    for (let i = 1; i <= days; i++) {
+
+      const dayModules = modules.slice(index, index + modulesPerDay);
+
+      generatedPlan.push({
+        day: i,
+        modules: dayModules
+      });
+
+      index += modulesPerDay;
+
+    }
+
+    setPlan(generatedPlan);
 
   };
 
@@ -71,7 +76,9 @@ const DayPlanner = () => {
 
     <div className="max-w-4xl mx-auto space-y-6">
 
-      <h1 className="text-2xl font-bold">Day Wise Study Planner</h1>
+      <h1 className="text-2xl font-bold">Smart Study Planner</h1>
+
+      {/* COURSE LIST */}
 
       {!selectedCourse && (
 
@@ -84,17 +91,17 @@ const DayPlanner = () => {
               className="bg-white p-6 rounded-xl shadow border"
             >
 
-              <h2 className="text-lg font-bold">{course.title}</h2>
+              <h2 className="font-bold text-lg">{course.title}</h2>
 
               <p className="text-gray-500 text-sm mb-4">
                 {course.description}
               </p>
 
               <button
-                onClick={() => generatePlan(course.id)}
+                onClick={() => openCourse(course.id)}
                 className="bg-primary-600 text-white px-4 py-2 rounded-lg"
               >
-                Generate Plan
+                Create Plan
               </button>
 
             </div>
@@ -105,60 +112,83 @@ const DayPlanner = () => {
 
       )}
 
+      {/* COURSE PLANNER */}
+
       {selectedCourse && (
 
-        <div>
+        <div className="space-y-6">
 
           <button
-            onClick={() => setSelectedCourse(null)}
-            className="mb-4 text-primary-600"
+            onClick={() => {
+              setSelectedCourse(null);
+              setPlan([]);
+            }}
+            className="text-primary-600"
           >
             ← Back to Courses
           </button>
 
-          <h2 className="text-xl font-bold mb-6">
-            {selectedCourse.title} Study Plan
+          <h2 className="text-xl font-bold">
+            {selectedCourse.title} Planner
           </h2>
 
-          <div className="space-y-4">
+          {/* ENTER DAYS */}
 
-            {modules.map(module => (
+          <div className="flex gap-4">
 
-              <div
-                key={module.id}
-                className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
-              >
+            <input
+              type="number"
+              placeholder="Enter number of days"
+              value={days}
+              onChange={(e) => setDays(e.target.value)}
+              className="border p-3 rounded-lg w-64"
+            />
 
-                <div>
+            <button
+              onClick={generatePlan}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg"
+            >
+              Generate Plan
+            </button>
 
-                  <h3 className="font-semibold">
-                    Day {module.day_number}
+          </div>
+
+          {/* PLAN RESULT */}
+
+          {plan.length > 0 && (
+
+            <div className="space-y-4">
+
+              {plan.map(day => (
+
+                <div
+                  key={day.day}
+                  className="bg-white p-5 rounded-xl shadow"
+                >
+
+                  <h3 className="font-bold mb-3">
+                    Day {day.day}
                   </h3>
 
-                  <p className="text-gray-500 text-sm">
-                    {module.title}
-                  </p>
+                  <ul className="list-disc ml-5 space-y-1">
+
+                    {day.modules.map(module => (
+
+                      <li key={module.id}>
+                        {module.title}
+                      </li>
+
+                    ))}
+
+                  </ul>
 
                 </div>
 
-                <button
-                  onClick={() => toggleComplete(module.id)}
-                  className={`px-4 py-2 rounded-lg ${
-                    progress[module.id]
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-200"
-                  }`}
-                >
+              ))}
 
-                  {progress[module.id] ? "Completed" : "Mark Done"}
+            </div>
 
-                </button>
-
-              </div>
-
-            ))}
-
-          </div>
+          )}
 
         </div>
 
