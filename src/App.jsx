@@ -27,7 +27,6 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/student/day-planner" element={<DayPlanner />} />
           
           {/* Trainer Routes */}
           <Route path="/trainer" element={<PrivateRoute role="trainer"><TrainerDashboard /></PrivateRoute>} />
@@ -39,10 +38,8 @@ const App = () => {
           <Route path="/student" element={<PrivateRoute role="student"><StudentDashboard /></PrivateRoute>} />
           <Route path="/student/courses" element={<PrivateRoute role="student"><CourseList /></PrivateRoute>} />
           <Route path="/student/attendance" element={<PrivateRoute role="student"><AttendanceHistory /></PrivateRoute>} />
-          <Route path="/student/course/:id" element={<PrivateRoute role="student"> <CourseModules /></PrivateRoute>
-          
-  } 
-/>
+          <Route path="/student/course/:id" element={<PrivateRoute role="student"> <CourseModules /></PrivateRoute>} />
+          <Route path="/student/day-planner" element={<PrivateRoute role="student"><DayPlanner /></PrivateRoute>} />
 
           {/* Default Routes */}
           <Route path="/" element={<Navigate to="/login" />} />
