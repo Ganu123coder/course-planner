@@ -1,124 +1,173 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import api from "../../api";
 
 const DayPlanner = () => {
 
-  const [plans, setPlans] = useState([]);
-  const [task, setTask] = useState("");
-  const [date, setDate] = useState("");
-
-  /* Load saved plans */
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [modules, setModules] = useState([]);
+  const [progress, setProgress] = useState({});
 
   useEffect(() => {
-    const savedPlans = JSON.parse(localStorage.getItem("studyPlans")) || [];
-    setPlans(savedPlans);
+    fetchCourses();
   }, []);
 
-  /* Save plans */
+  const fetchCourses = async () => {
 
-  const savePlans = (updatedPlans) => {
-    setPlans(updatedPlans);
-    localStorage.setItem("studyPlans", JSON.stringify(updatedPlans));
-  };
+    try {
 
-  /* Add new plan */
+      const res = await api.get("/courses");
 
-  const addPlan = () => {
-    if (!task || !date) {
-      alert("Please enter task and date");
-      return;
+      setCourses(res.data);
+
+    } catch (err) {
+
+      console.error("Failed to fetch courses");
+
     }
 
-    const newPlan = {
-      id: Date.now(),
-      task,
-      date
-    };
-
-    const updatedPlans = [...plans, newPlan];
-
-    savePlans(updatedPlans);
-
-    setTask("");
-    setDate("");
   };
 
-  /* Delete plan */
+  const generatePlan = async (courseId) => {
 
-  const deletePlan = (id) => {
-    const updatedPlans = plans.filter(plan => plan.id !== id);
-    savePlans(updatedPlans);
+    try {
+
+      const res = await api.get(`/courses/${courseId}`);
+
+      setSelectedCourse(res.data);
+
+      setModules(res.data.modules);
+
+      const savedProgress =
+        JSON.parse(localStorage.getItem(`planner_${courseId}`)) || {};
+
+      setProgress(savedProgress);
+
+    } catch (err) {
+
+      console.error("Failed to load modules");
+
+    }
+
+  };
+
+  const toggleComplete = (moduleId) => {
+
+    const updated = {
+      ...progress,
+      [moduleId]: !progress[moduleId]
+    };
+
+    setProgress(updated);
+
+    localStorage.setItem(
+      `planner_${selectedCourse.id}`,
+      JSON.stringify(updated)
+    );
+
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
 
-      <h1 className="text-2xl font-bold mb-6">Day Wise Study Planner</h1>
+    <div className="max-w-4xl mx-auto space-y-6">
 
-      {/* Add Plan */}
+      <h1 className="text-2xl font-bold">Day Wise Study Planner</h1>
 
-      <div className="bg-white p-6 rounded-xl shadow mb-6 space-y-4">
+      {!selectedCourse && (
 
-        <input
-          type="text"
-          placeholder="Study topic (ex: React Hooks)"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          className="w-full border p-3 rounded-lg"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full border p-3 rounded-lg"
-        />
+          {courses.map(course => (
 
-        <button
-          onClick={addPlan}
-          className="flex items-center bg-primary-600 text-white px-4 py-2 rounded-lg"
-        >
-          <Plus className="w-4 h-4 mr-2"/>
-          Add Plan
-        </button>
+            <div
+              key={course.id}
+              className="bg-white p-6 rounded-xl shadow border"
+            >
 
-      </div>
+              <h2 className="text-lg font-bold">{course.title}</h2>
 
-      {/* Plans List */}
+              <p className="text-gray-500 text-sm mb-4">
+                {course.description}
+              </p>
 
-      <div className="space-y-4">
+              <button
+                onClick={() => generatePlan(course.id)}
+                className="bg-primary-600 text-white px-4 py-2 rounded-lg"
+              >
+                Generate Plan
+              </button>
 
-        {plans.length === 0 && (
-          <p className="text-gray-500">No study plans created yet.</p>
-        )}
-
-        {plans.map(plan => (
-
-          <div
-            key={plan.id}
-            className="flex justify-between items-center bg-white p-4 rounded-lg shadow"
-          >
-
-            <div>
-              <h3 className="font-semibold">{plan.task}</h3>
-              <p className="text-sm text-gray-500">{plan.date}</p>
             </div>
 
-            <button
-              onClick={() => deletePlan(plan.id)}
-              className="text-red-500"
-            >
-              <Trash2 className="w-5 h-5"/>
-            </button>
+          ))}
+
+        </div>
+
+      )}
+
+      {selectedCourse && (
+
+        <div>
+
+          <button
+            onClick={() => setSelectedCourse(null)}
+            className="mb-4 text-primary-600"
+          >
+            ← Back to Courses
+          </button>
+
+          <h2 className="text-xl font-bold mb-6">
+            {selectedCourse.title} Study Plan
+          </h2>
+
+          <div className="space-y-4">
+
+            {modules.map(module => (
+
+              <div
+                key={module.id}
+                className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
+              >
+
+                <div>
+
+                  <h3 className="font-semibold">
+                    Day {module.day_number}
+                  </h3>
+
+                  <p className="text-gray-500 text-sm">
+                    {module.title}
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={() => toggleComplete(module.id)}
+                  className={`px-4 py-2 rounded-lg ${
+                    progress[module.id]
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+
+                  {progress[module.id] ? "Completed" : "Mark Done"}
+
+                </button>
+
+              </div>
+
+            ))}
 
           </div>
 
-        ))}
+        </div>
 
-      </div>
+      )}
 
     </div>
+
   );
+
 };
 
 export default DayPlanner;
