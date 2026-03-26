@@ -137,7 +137,16 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/courses', (req, res) => {
 
-  const courses = db.prepare("SELECT * FROM courses").all();
+  const courses = db.prepare(`
+    SELECT 
+      c.*,
+      COUNT(e.id) AS student_count
+    FROM courses c
+    LEFT JOIN enrollments e
+    ON c.id = e.course_id
+    GROUP BY c.id
+  `).all();
+
   res.json(courses);
 
 });
