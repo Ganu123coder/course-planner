@@ -77,7 +77,15 @@ app.post('/api/login', (req, res) => {
 // --- COURSE ROUTES ---
 
 app.get('/api/courses', (req, res) => {
-  const courses = db.prepare('SELECT * FROM courses').all();
+ const courses = db.prepare(`
+  SELECT 
+    c.*,
+    COUNT(e.id) as students
+  FROM courses c
+  LEFT JOIN enrollments e
+  ON c.id = e.course_id
+  GROUP BY c.id
+`).all();
   res.json(courses);
 });
 
@@ -113,6 +121,34 @@ app.post('/api/upload-assignment', upload.single('file'), (req, res) => {
 
   res.json({ message: "Assignment uploaded successfully" });
 });
+// --- DASHBOARD STATS ---
+
+app.get('/api/dashboard-stats', authenticateToken, (req, res) => {
+
+  const totalCourses = db.prepare(`
+    SELECT COUNT(*) as count FROM courses
+  `).get();
+
+  const totalStudents = db.prepare(`
+    SELECT COUNT(*) as count FROM users WHERE role='student'
+  `).get();
+
+  const totalEnrollments = db.prepare(`
+    SELECT COUNT(*) as count FROM enrollments
+  `).get();
+
+  const totalModules = db.prepare(`
+    SELECT COUNT(*) as count FROM modules
+  `).get();
+
+  res.json({
+    courses: totalCourses.count,
+    students: totalStudents.count,
+    enrollments: totalEnrollments.count,
+    modules: totalModules.count
+  });
+
+});
 // --- MODULE ROUTES ---
 
 app.post('/api/modules', authenticateToken, (req, res) => {
@@ -145,6 +181,28 @@ app.get('/api/my-courses', authenticateToken, (req, res) => {
     WHERE e.student_id = ?
   `).all(req.user.id);
   res.json(enrollments);
+});
+// --- COURSE STUDENTS ---
+
+app.get('/api/course/:id/students', authenticateToken, (req, res) => {
+
+  if (req.user.role !== 'trainer') {
+    return res.status(403).json({ message: 'Trainers only' });
+  }
+
+  const students = db.prepare(`
+    SELECT 
+      u.id,
+      u.name,
+      u.email
+    FROM users u
+    JOIN enrollments e
+    ON u.id = e.student_id
+    WHERE e.course_id = ?
+  `).all(req.params.id);
+
+  res.json(students);
+
 });
 
 // --- ATTENDANCE ROUTES ---
