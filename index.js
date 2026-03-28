@@ -12,6 +12,11 @@ const SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const multer = require('multer');
 const path = require('path');
 
+const [dark,setDark] = useState(false);
+
+<button onClick={()=>setDark(!dark)}>
+Toggle Theme
+</button>
 // Storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
